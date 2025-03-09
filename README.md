@@ -4,7 +4,8 @@ The [official Python Docker images](https://hub.docker.com/_/python) currently (
 (for the latest Debian releases):
 
 - `2.7`: `buster`
-- `3.6`: `bullseye`
+- `3.6`: `bullseye` (with [this patch](https://github.com/pyenv/pyenv-virtualenv/issues/410#issuecomment-1125942002) to
+  avoid segmentation fault when using `pip`)
 - For 3.7+, `bookworm` is available
 
 I just got the official Dockerfile for those Python versions and upgraded them to be based on Debian bookworm. You can
@@ -20,8 +21,8 @@ use [the following image versions from Docker Hub](https://hub.docker.com/r/turi
 git clone https://github.com/turicas/docker-python-old docker-python-old
 cd docker-python-old
 
-docker build -f py36-slim-bookworm.Dockerfile -t turicas/python:3.6-slim-bookworm . # ~2min36s
 docker build -f py27-slim-bookworm.Dockerfile -t turicas/python:2.7-slim-bookworm . # ~3min40s
+docker build -f py36-slim-bookworm.Dockerfile -t turicas/python:3.6-slim-bookworm . # ~2min36s
 ```
 
 Result:
@@ -65,6 +66,8 @@ sed '
   s/debian:bullseye-slim/debian:bookworm-slim/;
   s/ENV \(.*\?\) \(.*\)$/ENV \1=\2/;
   s/GPG_KEY/GPG_PUBKEY/g;
+  /ENV PYTHON_VERSION=.*/a COPY 3.6/alignment.patch /tmp/
+  /cd \/usr\/src\/python/a && cat \/tmp\/alignment.patch | patch -fp0 && rm \/tmp\/alignment.patch \\
 ' py36-slim-bullseye.Dockerfile > py36-slim-bookworm.Dockerfile
 sed '
   s/debian:buster-slim/debian:bookworm-slim/;

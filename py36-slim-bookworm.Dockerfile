@@ -24,6 +24,7 @@ RUN set -eux; \
 
 ENV GPG_PUBKEY=0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
 ENV PYTHON_VERSION=3.6.15
+COPY 3.6/alignment.patch /tmp/
 
 RUN set -ex \
 	\
@@ -62,6 +63,7 @@ RUN set -ex \
 	&& rm python.tar.xz \
 	\
 	&& cd /usr/src/python \
+&& cat /tmp/alignment.patch | patch -fp0 && rm /tmp/alignment.patch \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
 	&& ./configure \
 		--build="$gnuArch" \
